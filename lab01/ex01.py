@@ -17,7 +17,7 @@ default_args = {
 dag = DAG(
     "myFirstDAG",
     default_args=default_args,
-    schedule_interval="@once"
+    schedule_interval="@daily"
 )
 
 def hello_airflow():
