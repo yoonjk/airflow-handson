@@ -6,6 +6,7 @@ from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago 
 from airflow.utils.task_group import TaskGroup
 from datetime import datetime, timedelta  
+from time import sleep
 
 default_args = {
   'start_date': days_ago(1),
