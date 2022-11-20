@@ -15,8 +15,9 @@ default_args = {
   'catchup': False,
   'description': '샘플 dag'
 }
-def hello():
+def hello() -> None:
     print('Hello')
+    sleep(3)
     
 with DAG(
   dag_id='ex_group',
