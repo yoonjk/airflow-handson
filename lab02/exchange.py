@@ -1,8 +1,18 @@
+
+import json
+from airflow.decorators import dag, task 
+from airflow.utils.dates import days_ago 
+from datetime import datetime, timedelta 
+
 import requests 
 import pandas as pd #한국 수출입은행 환율 API 발급 
 import json 
-#인증키 발급하기 
-#https://www.koreaexim.go.kr/ir/HPHKIR020M01?apino=2&viewtype=C#tab1 
+import pymqi
+
+default_args = {
+    "start_date": days_ago(1),
+    "catchup": False
+}
 
 params = {
   'authkey': 'xGTRDgpwNc1hmKTp2KLB5mTpnNg9Ibil',
@@ -10,50 +20,53 @@ params = {
   'data': 'AP01'
 }
 
+queue_manager = pymqi.connect('PRACTICUM', 'PRACTICUM.SVRCONN', '10.100.1.20(31414)')
+
+
+
 url ='https://www.koreaexim.go.kr/site/program/financial/exchangeJSON'
-res = requests.get(url, params)
 
-if res.status_code == 200:
-  json_data = res.json()
-  #print(json_data)
-  df = pd.json_normalize(json_data)
+@dag(
+    dag_id = 'exchange-daily',
+    default_args = default_args
+)
+def example_etl():
 
-  df.drop(columns = ['result', 'bkpr', 'yy_efee_r', 'ten_dd_efee_r', 'kftc_bkpr','kftc_deal_bas_r'] , axis=1, inplace=True)
-  df['base_dt'] = '20221130'
+    @task 
+    def extract():
+        res = requests.get(url, params)
 
+        if res.status_code == 200:
+          json_data = res.json()
+        #print(json_data)
+          df = pd.json_normalize(json_data)
 
-  print(df)
+        df.drop(columns = ['result', 'bkpr', 'yy_efee_r', 'ten_dd_efee_r', 'kftc_bkpr','kftc_deal_bas_r'] , axis=1, inplace=True)
+        df['base_dt'] = '20221130'
 
-  df.rename(columns = {'deal_bas_r' : 'dealBasR', 'cur_nm': 'curNm', 'cur_unit': 'curUnit', 'base_dt': 'baseDt'}, inplace = True)
-  jsonData = df.to_json(orient = 'records')
-  print(jsonData)
-
-
-params["baseDate"] = '20221130'
-
-headers = {'content-type': 'application/json'};
-url = 'http://localhost:8080/exchange/bulkload/{{baseDate}}'
-res = requests.post(url,  params = params, data =jsonData, headers = headers)
-  
-print(res)
-   # pd.DataFrame(json_data, columns = ['result', 'cur_unit', 'ttb', 'tts', 'deal_bas_r', 'bkpr', 'yy_efee_r', 'ten_dd_efee_r' , 'kftc_bkpr', 'kftc_deal_bas_r','cur_nm'] )  
+        print(df)
+        jsonData = df.to_json(orient = 'records')
+        print(jsonData)
 
 
-    # print(cur_unit, base_dt, ttb, tts, deal_bas_r, bkpr, yy_efee_r, cur_nm) 
-  
+        #return order_data_dict 
+        return jsonData
 
+    @task
+    def transform(data_dict: dict):
+        total_order_value=0
+        print('transform')
+        # print(data_dict)
 
-# exchange_rate_summary = pd.DataFrame(json_data)   
-# print (exchange_rate_summary)
-#컬럼정보 
-#result             조회 결과
-#cur_unit           통화코드 
-#ttb                전신환(송금)받으실때 
-#tts                전신환(송금)보내실때 
-#deal_bas_r         매매 기준율 
-#bkpr               장부가격 
-#yy_efee_r          년환가료율 
-#ten_dd_efee_r      10일환가료율 
-#kftc_bkpr          서울외국환중개 매매기준율 
-#kftc_deal_bas_r    서울외국환중개 장부가격 
-#cur_nm             국가/통화명
+        q = pymqi.Queue(queue_manager, 'PRACTICUM.LQ')
+        for record in data_dict.items():
+            print (record)
+        #q.put('airflow test message')
+        
+    
+
+    order_data = extract()
+    transform(order_data)
+    # load(order_summary['total_order_value'])
+
+etl_dag = example_etl()
