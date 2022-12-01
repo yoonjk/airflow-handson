@@ -19,5 +19,24 @@ airflow users create \
 
 airflow webserver -p 8080 -D
 
+sudo yum install @postgresql:9.6
+or
+sudo yum install @postgresql
 
+sudo postgresql-setup --initdb
 
+sudo passwd postgres
+
+sudo systemctl start postgresql ## <-- start the server ##
+sudo systemctl stop postgresql ## <-- stop the server ##
+sudo systemctl restart postgresql ## <-- resstart the server ##
+sudo systemctl status postgresql ## <-- get status of the server ##
+
+sudo systemctl enable postgresql
+
+sudo -i -u postgres
+
+# Setup postgresql for airflow
+CREATE DATABASE airflow;
+CREATE USER airflow WITH ENCRYPTED PASSWORD 'airflow';
+GRANT ALL PRIVILEGES ON DATABASE airflow TO airflow;
