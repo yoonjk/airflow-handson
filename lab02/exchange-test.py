@@ -32,7 +32,7 @@ if res.status_code == 200:
 params["baseDate"] = '20221130'
 
 headers = {'content-type': 'application/json'};
-url = 'http://localhost:8080/exchange/bulkload/{{baseDate}}'
+url = 'http://localhost:8090/exchange/bulkload/{{baseDate}}'
 res = requests.post(url,  params = params, data =jsonData, headers = headers)
   
 print(res)
