@@ -10,8 +10,12 @@ import pendulum
 kst = pendulum.timezone("Asia/Seoul")
 
 default_args = {
-    "start_date": days_ago(1),
-    "catchup": False,
+    'start_date': datetime(2022, 1, 2, tzinfo = kst),
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
+    'schedule_interval': '@daily',
+    'tags': 'training',
+    'catchup': False
 }
 
 dag = DAG(

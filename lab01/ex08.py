@@ -33,6 +33,4 @@ task2 = python_task = PythonOperator(
     dag=dag 
 )
 
-
-
 task1 >> task2

@@ -28,7 +28,7 @@ if res.status_code == 200:
   jsonData = df.to_json(orient = 'records')
   print(jsonData)
 
-
+params = dict()
 params["baseDate"] = '20221130'
 
 headers = {'content-type': 'application/json'};
