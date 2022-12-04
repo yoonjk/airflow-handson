@@ -4,9 +4,11 @@ import json
 #인증키 발급하기 
 #https://www.koreaexim.go.kr/ir/HPHKIR020M01?apino=2&viewtype=C#tab1 
 
+baseDate = '20221201'
+
 params = {
   'authkey': 'xGTRDgpwNc1hmKTp2KLB5mTpnNg9Ibil',
-  'searchdate': '20220810',
+  'searchdate': baseDate,
   'data': 'AP01'
 }
 
@@ -19,7 +21,7 @@ if res.status_code == 200:
   df = pd.json_normalize(json_data)
 
   df.drop(columns = ['result', 'bkpr', 'yy_efee_r', 'ten_dd_efee_r', 'kftc_bkpr','kftc_deal_bas_r'] , axis=1, inplace=True)
-  df['base_dt'] = '20221130'
+  df['base_dt'] = baseDate
 
 
   print(df)
@@ -28,18 +30,14 @@ if res.status_code == 200:
   jsonData = df.to_json(orient = 'records')
   print(jsonData)
 
-params = dict()
-params["baseDate"] = '20221130'
 
+params["baseDate"] = baseDate
 headers = {'content-type': 'application/json'};
-url = 'http://localhost:8090/exchange/bulkload/{{baseDate}}'
+url = 'http://exchange-practicum.apps.labs.ihost.com/exchange/bulkload/{{baseDate}}'
 res = requests.post(url,  params = params, data =jsonData, headers = headers)
   
 print(res)
-   # pd.DataFrame(json_data, columns = ['result', 'cur_unit', 'ttb', 'tts', 'deal_bas_r', 'bkpr', 'yy_efee_r', 'ten_dd_efee_r' , 'kftc_bkpr', 'kftc_deal_bas_r','cur_nm'] )  
 
-
-    # print(cur_unit, base_dt, ttb, tts, deal_bas_r, bkpr, yy_efee_r, cur_nm) 
   
 
 

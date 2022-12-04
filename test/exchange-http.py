@@ -18,7 +18,7 @@ default_args = {
 
 
 @dag(
-    dag_id = 'exchange-daily',
+    dag_id = 'exchange-daily-http',
     default_args = default_args
 )
 def example_etl():
@@ -27,7 +27,7 @@ def example_etl():
     def extract():
         params = {
           'authkey': 'xGTRDgpwNc1hmKTp2KLB5mTpnNg9Ibil',
-          'searchdate': '20220810',
+          'searchdate': '20221130',
           'data': 'AP01'
         }
         
@@ -63,7 +63,7 @@ def example_etl():
         reqData = json.dumps(data_dict,ensure_ascii=False).encode('utf8')
  
         headers = {'Content-Type': 'application/json'}
-        url = 'http://9.194.103.219:8090/exchange/bulkload/{{baseDate}}'
+        url = 'http://http://exchange-practicum.apps.labs.ihost.com/exchange/bulkload/{{baseDate}}'
         # url = 'http://9.194.103.219:8090/exchange/bulkload'
         print(url, reqData)    
         res = requests.post(url, params = params, data =reqData, headers = headers)

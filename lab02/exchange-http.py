@@ -1,6 +1,7 @@
 
 import json
-from airflow.decorators import dag, task 
+from airflow import DAG
+from airflow.operators.python import PythonOperator 
 from airflow.utils.dates import days_ago 
 from datetime import datetime, timedelta 
 
@@ -16,24 +17,20 @@ default_args = {
   'schedule_interval': '@dialy'
 }
 
-
-@dag(
-    dag_id = 'exchange-daily',
+baseDate = '20221118'
+params = {
+  'authkey': 'xGTRDgpwNc1hmKTp2KLB5mTpnNg9Ibil',
+  'searchdate': baseDate,
+  'data': 'AP01'
+}
+with DAG (       
+    dag_id = 'exchange-daily-http',
     default_args = default_args
-)
-def example_etl():
+) as dag:
 
-    @task 
     def extract():
-        params = {
-          'authkey': 'xGTRDgpwNc1hmKTp2KLB5mTpnNg9Ibil',
-          'searchdate': '20220810',
-          'data': 'AP01'
-        }
-        
         url ='https://www.koreaexim.go.kr/site/program/financial/exchangeJSON'
         res = requests.get(url, params)
-
 
         if res.status_code == 200:
           json_data = res.json()
@@ -41,7 +38,7 @@ def example_etl():
           df = pd.json_normalize(json_data)
         
           df.drop(columns = ['result', 'bkpr', 'yy_efee_r', 'ten_dd_efee_r', 'kftc_bkpr','kftc_deal_bas_r', 'cur_nm'] , axis=1, inplace=True)
-          df['base_dt'] = '20221130'
+          df['base_dt'] = baseDate
           df['cur_nm'] = ' ' 
         
           print(df)
@@ -52,26 +49,33 @@ def example_etl():
 
           return jsonData
 
-    @task
-    def transform(data_dict: dict):
+    
+    def transform(**context):
+        jsonData = context['task_instance'].xcom_pull(task_ids='extract')
         total_order_value=0
-        print('transform')
+        print('transform1')
         # print(data_dict)
-        params = dict()
-        params["baseDate"] = '20221130'
-        
-        reqData = json.dumps(data_dict,ensure_ascii=False).encode('utf8')
- 
+        print(jsonData)
+  
+        print('2. transform')
+        param = {
+          'baseDate': baseDate
+        }
         headers = {'Content-Type': 'application/json'}
-        url = 'http://9.194.103.219:8090/exchange/bulkload/{{baseDate}}'
-        # url = 'http://9.194.103.219:8090/exchange/bulkload'
-        print(url, reqData)    
-        res = requests.post(url, params = params, data =reqData, headers = headers)
+        url = 'http://exchange-practicum.apps.labs.ihost.com/exchange/bulkload/{baseDate}'.format(**param)
+          
+        res = requests.post(url, params = params, data =jsonData, headers = headers)
         print (res)
     
+    extract = PythonOperator(
+      task_id = 'extract',
+      python_callable = extract
+    )
 
-    order_data = extract()
-    transform(order_data)
-    # load(order_summary['total_order_value'])
-
-etl_dag = example_etl()
+    transform = PythonOperator(
+      task_id = 'transform',
+      python_callable = transform,
+      provide_context=True
+    )
+    
+    extract >> transform
