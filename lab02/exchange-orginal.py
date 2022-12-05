@@ -19,7 +19,7 @@ default_args = {
 }
 
 params = {
-  'authkey': 'xGTRDgpwNc1hmKTp2KLB5mTpnNg9Ibil',
+  'authkey': 'API-Key',
   'searchdate': '20220810',
   'data': 'AP01'
 }
