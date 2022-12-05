@@ -19,7 +19,7 @@ default_args = {
 
 baseDate = '20221118'
 params = {
-  'authkey': 'xGTRDgpwNc1hmKTp2KLB5mTpnNg9Ibil',
+  'authkey': 'API-Key',
   'searchdate': baseDate,
   'data': 'AP01'
 }
