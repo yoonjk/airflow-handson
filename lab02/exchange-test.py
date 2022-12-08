@@ -5,7 +5,7 @@ import json
 #https://www.koreaexim.go.kr/ir/HPHKIR020M01?apino=2&viewtype=C#tab1 
 
 params = {
-  'authkey': 'xGTRDgpwNc1hmKTp2KLB5mTpnNg9Ibil',
+  'authkey': 'API-Key',
   'searchdate': '20220810',
   'data': 'AP01'
 }
