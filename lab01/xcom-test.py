@@ -1,14 +1,20 @@
 from airflow import DAG 
 from airflow.operators.python import PythonOperator 
-
 # Utils
 from airflow.utils.dates import days_ago 
 from datetime import datetime, timedelta 
 
+default_args = {
+  'start_date': days_ago(1),
+  'retries': 1,
+  'retry_delay': timedelta(minutes=5),
+  'schedule_interval': '@daily',
+  'catchup': False
+}
+
 def _xcom_push(**context):
   xcom_val = 'val1'
   context['task_instance'].xcom_push(key = 'key1', value = xcom_val)
-  
   return 'xcom_return_val'
 
 def _xcom_pull(**context):
@@ -19,14 +25,6 @@ def _xcom_pull(**context):
   print('xcom_return :{}'.format(xcom_return))
   print('xcom_push_val : {}'.format(xcom_push_val))
   print('xcom_push_return_val : {}'.format(xcom_return_val))
-
-default_args = {
-  'start_date': days_ago(1),
-  'retries': 1,
-  'retry_delay': timedelta(minutes=5),
-  'schedule_interval': '@daily',
-  'catchup': False
-}
 
 with DAG (
   dag_id = 'xcom-test',
@@ -44,4 +42,5 @@ with DAG (
   )
   
   xcom_push_task >> xcom_pull_task 
+  
   
