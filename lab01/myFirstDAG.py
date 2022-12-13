@@ -6,11 +6,8 @@ from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago 
 import pendulum
 
-# timezone 한국시간으로 변경
-kst = pendulum.timezone("Asia/Seoul")
-
 default_args = {
-    'start_date': datetime(2022, 1, 2, tzinfo = kst),
+    'start_date': days_ago(1),
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
     'schedule_interval': '@daily',
@@ -18,14 +15,14 @@ default_args = {
     'catchup': False
 }
 
+def hello_airflow():
+    print("Hello airflow")
+    
 dag = DAG(
-    "myFirstDAG",
+    dag_id = "myFirstDag",
     default_args=default_args,
     schedule_interval="@daily"
 )
-
-def hello_airflow():
-    print("Hello airflow")
 
 t1 = BashOperator(
     task_id="bash",
@@ -40,3 +37,4 @@ t2 = PythonOperator(
 )
 
 t1 >> t2
+
