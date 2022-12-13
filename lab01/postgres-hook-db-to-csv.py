@@ -1,5 +1,6 @@
 from airflow import DAG 
 from airflow.operators.python import PythonOperator
+from airflow.operators.empty import EmptyOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook 
 
 from airflow.utils.dates import days_ago 
@@ -23,16 +24,18 @@ def export_db_to_csv(sql):
   pg_hook.copy_expert(sql, filename='/opt/airflow/data/customer.csv')
   
 with DAG(
-  dag_id = 'postgres-hook',
+  dag_id = 'postgres-hook-db-to-csv',
   default_args = default_args,
   tags=['training']
 ) as dag: 
-  t1 = PythonOperator(
-    task_id = 'extract-task',
+  start = EmptyOperator(task_id='start')
+  end = EmptyOperator(task_id='end') 
+  export_task = PythonOperator(
+    task_id = 'export-task',
     python_callable=export_db_to_csv,
     op_kwargs = {
       'sql': "COPY (SELECT * FROM CUSTOMER WHERE first_name = 'john' ) TO STDOUT WITH CSV HEADER"
     }
   )
   
-  t1 
+  start >> export_task >> end 

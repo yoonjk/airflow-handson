@@ -12,7 +12,8 @@ default_args = {
   'catchup': False
 }
 
-with DAG ('file_sensor_ex01',
+with DAG (
+  dag_id ='filesensor',
   default_args = default_args, 
   schedule_interval='@daily'
 ) as dag:

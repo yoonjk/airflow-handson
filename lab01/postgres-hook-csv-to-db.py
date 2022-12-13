@@ -1,10 +1,10 @@
 from airflow import DAG 
 from airflow.operators.python import PythonOperator
+from airflow.operators.empty import EmptyOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook 
-
+# utils
 from airflow.utils.dates import days_ago 
 from datetime import timedelta 
-
 import logging 
 
 default_args = {
@@ -22,19 +22,23 @@ def load_csv_to_db(sql):
 
   logging.info('Importing file to db:{}'.format(sql))
   pg_hook.copy_expert(sql, filename='/opt/airflow/data/customer.csv')
-  
-
 
 with DAG(
-  dag_id = 'postgres-hook-import-csv-to-db',
+  dag_id = 'postgres-hook-csv-to-db',
   default_args = default_args,
   tags=['training']
 ) as dag: 
-  t1 = PythonOperator(
-    task_id = 'extract-task',
+
+  start = EmptyOperator(task_id='start')
+  end = EmptyOperator(task_id='end') 
+  load_task = PythonOperator(
+    task_id = 'load-task',
     python_callable=load_csv_to_db,
     op_kwargs = {
       'sql': "COPY customer from STDIN WITH CSV HEADER"
     }
   )
+  
+  start >> load_task >> end 
+
   
