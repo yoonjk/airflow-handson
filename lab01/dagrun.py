@@ -6,7 +6,7 @@
 
 from airflow import DAG 
 from airflow.operators.bash import BashOperator 
-
+# Utils 
 from airflow.utils.dates import days_ago 
 from datetime import datetime, timedelta 
 import pendulum 
@@ -18,9 +18,8 @@ default_args = {
   'start_date': datetime(2022,12,2, tzinfo=kst) ,
   'retries': 1,
   'retry_delay': timedelta(minutes = 5),
-  'catchup': False,
-  'scheduler_interval': '@daily'
- 
+  'scheduler_interval': '@daily',
+  'catchup': False
 }
 
 dag = DAG(

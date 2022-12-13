@@ -64,6 +64,11 @@ x-airflow-common:
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
     - ./sensor:/opt/airflow/sensor
+    - ./data:/opt/airflow/data
+    - type: bind
+      source: ./airflow-data/airflow.cfg 
+      target: /opt/airflow/airflow.cfg 
+      read_only: true
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -148,6 +153,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+
+
 
   airflow-triggerer:
     <<: *airflow-common
@@ -277,3 +284,4 @@ services:
 
 volumes:
   postgres-db-volume:
+
