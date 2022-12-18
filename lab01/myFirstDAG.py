@@ -1,10 +1,9 @@
 
 from airflow import DAG 
-from datetime import datetime, timedelta 
+from datetime import timedelta 
 from airflow.operators.bash import BashOperator 
 from airflow.operators.python import PythonOperator 
 from airflow.utils.dates import days_ago 
-import pendulum
 
 default_args = {
     'start_date': days_ago(1),
